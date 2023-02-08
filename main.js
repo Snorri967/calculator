@@ -4,7 +4,7 @@ const operands = document.querySelectorAll(".number");
 const clear = document.querySelector(".clearButton");
 const operators = document.querySelectorAll(".operator");
 const equals = document.querySelector(".equalsButton");
-const backspace = document.querySelector(".backspace");
+const decimal = document.querySelector(".decimal");
 
 let firstOperand = 0;
 let secondOperand = 0;
@@ -14,7 +14,7 @@ let secondOperator = "";
 
 let operandDisplay = "";
 
-let runningTotal = "";
+let runningTotal = 0;
 
 displayValue.innerText = 0;
 
@@ -23,7 +23,7 @@ function getOperands() {
     operand.addEventListener("click", () => {
       updateOperand(operand.innerText);
       limitCharacterLength();
-      
+      handleDecimals(operand);
     })
   })
 }
@@ -58,7 +58,10 @@ function updateOperand(operand) {
 }
 
 function updateOperator(operator) {
-  if (firstOperand === 0 && firstOperator === "") {
+  if (firstOperand === "0" && firstOperator === "/" || secondOperand === "0" && firstOperator === "/") {
+    displayValue.textContent = "Divide by Zero?!";
+    firstOperator = "";
+  } else if (firstOperand === 0 && firstOperator === "") {
     operatorValue.innerText = "";
   } else if (firstOperand !== 0 && firstOperator === "") {
     firstOperator = operator;
@@ -70,7 +73,7 @@ function updateOperator(operator) {
     if (firstOperator === "/") {
       runningTotal = parseFloat(total).toFixed(2);
     } else {
-      runningTotal = total;
+      runningTotal = Number(total);
     }
     firstOperand = runningTotal 
     displayValue.innerText = firstOperand;
@@ -84,18 +87,20 @@ function updateOperator(operator) {
 function operateEquals() {
   equals.addEventListener("click", () => {
     let total = "";
-    if (firstOperand === 0) {
+    if (firstOperand === "0" && firstOperator === "/" || secondOperand === "0" && firstOperator === "/") {
+      displayValue.textContent = "Divide by Zero?!";
+    } else if (firstOperand === 0) {
       displayValue.innerText = "Error";
     } else if (firstOperand !== 0 && secondOperand === 0) {
       displayValue.innerText = firstOperand;
     } else if (firstOperand !== 0 && secondOperand !== 0) {
       total = operate(firstOperator, Number(firstOperand), Number(secondOperand));
-      console.log(firstOperator);
+      console.log(typeof total);
       if (firstOperator === "/") {
         runningTotal = parseFloat(total).toFixed(2);
         displayValue.innerText = runningTotal
       } else {
-        runningTotal = total;
+        runningTotal = Number(total);
       }
       displayValue.innerText = runningTotal;
       operatorValue.innerText = equals.innerText;
@@ -126,14 +131,13 @@ function limitCharacterLength() {
   }
 }
 
-function eraseNumber() {
-  backspace.addEventListener("click", () => {
-    operandDisplay = operandDisplay.substring(0, operandDisplay.length - 1);
-    displayValue.innerText = operandDisplay;
-  })
+function handleDecimals() {
+  if (operandDisplay.includes(".")) {
+    decimal.disabled = true;
+  } else {
+    decimal.disabled = false;
+  }
 }
-
-eraseNumber();
 
 function add(n1, n2) {
   return n1 + n2;
